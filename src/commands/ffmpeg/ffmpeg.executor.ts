@@ -1,4 +1,4 @@
-import { ChildProcessWithoutNullStreams } from "child_process";
+import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { CommandExecutor } from "../../core/executor/command.executor";
 import { ICommandExecutor } from "../../core/executor/command.types";
 import { IStreamLogger } from "../../core/handlers/stream-logger.interface";
@@ -6,6 +6,7 @@ import { ICommandExecutorFfmpeg, IFfmpegInput } from "./ffmpeg.types";
 import { FileService } from "../../core/files/file.service";
 import { PromptService } from "../../core/prompt/prompt.service";
 import { FfmpegBuilder } from "./ffmpeg.builder";
+import { StreamHandler } from "../../core/handlers/stream-logger.handler";
 
 export class FfmpegExecutor extends CommandExecutor<IFfmpegInput> {
     private fileService: FileService = new FileService();
@@ -31,11 +32,14 @@ export class FfmpegExecutor extends CommandExecutor<IFfmpegInput> {
             .output(output);
         return { command: 'ffmpeg', args, output };
     }
-    protected spawn(command: ICommandExecutorFfmpeg): ChildProcessWithoutNullStreams {
-        throw new Error("Method not implemented.");
-    }
-    protected processStream(stream: ChildProcessWithoutNullStreams, logger: IStreamLogger): void {
-        throw new Error("Method not implemented.");
+
+    protected executeSpawn({ output, command, args }: ICommandExecutorFfmpeg): ChildProcessWithoutNullStreams {
+        this.fileService.deleteFileIfExists(output);
+        return spawn(command, args);
     }
 
+    protected processStream(stream: ChildProcessWithoutNullStreams, logger: IStreamLogger): void {
+        const handler = new StreamHandler(logger);
+        handler.processOutput(stream);
+    }
 }

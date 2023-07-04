@@ -3,12 +3,12 @@ import { IStreamLogger } from "../../core/handlers/stream-logger.interface";
 export class ConsoleLogger implements IStreamLogger {
     private static instance: ConsoleLogger;
 
-    public static getInstance() {
+    public static getInstance(): ConsoleLogger {
         if (!ConsoleLogger.instance) {
             ConsoleLogger.instance = new ConsoleLogger();
         }
+        return ConsoleLogger.instance;
     }
-
 
     log(...args: any[]): void {
         console.log(...args);
@@ -21,5 +21,4 @@ export class ConsoleLogger implements IStreamLogger {
     error(...args: any[]): void {
         console.log(...args);
     }
-
 }
